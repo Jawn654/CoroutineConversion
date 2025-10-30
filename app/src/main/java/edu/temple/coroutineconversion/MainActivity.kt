@@ -7,6 +7,13 @@ import android.os.Looper
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
@@ -32,13 +39,28 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val scope = CoroutineScope(Job() + Dispatchers.Default)
+        suspend fun changeOpacity(){
+            repeat(100){
+                withContext(Dispatchers.Main) {
+                    currentTextView.text = String.format(Locale.getDefault(), "Current opacity: %d", it)
+                    cakeImageView.alpha = it / 100f
+                }
+                delay(40)
+            }
+
+        }
+
         findViewById<Button>(R.id.revealButton).setOnClickListener{
-            Thread{
+            scope.launch{
+                changeOpacity()
+            }
+            /*Thread{
                 repeat(100) {
                     handler.sendEmptyMessage(it)
                     Thread.sleep(40)
                 }
-            }.start()
+            }.start()*/
         }
     }
 }
